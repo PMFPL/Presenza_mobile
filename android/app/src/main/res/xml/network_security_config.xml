@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Base config for all domains - Allow cleartext traffic -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Specific config for your server IP -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">103.171.97.71</domain>
+        
+        <!-- Also allow local development -->
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </domain-config>
+
+    <!-- Debug config -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

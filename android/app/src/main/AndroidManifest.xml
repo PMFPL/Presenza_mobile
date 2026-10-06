@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ==================== REQUIRED PERMISSIONS ==================== -->
+    
+    <!-- Internet & Network -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <!-- Location (for geofencing & attendance) -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    
+    <!-- Camera (for selfie punch-in) -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- ==================== FCM / NOTIFICATION PERMISSIONS ==================== -->
+    
+    <!-- For Android 13+ (API 33+) - Required for push notifications -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    
+    <!-- For notification vibration -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    
+    <!-- For receiving push notifications when device boots -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- ==================== OPTIONAL FEATURES ==================== -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+   <uses-permission
+    android:name="com.google.android.gms.permission.AD_ID"
+    tools:node="remove" />
+
+    
+    <uses-feature 
+        android:name="android.hardware.camera" 
+        android:required="false" />
+    <uses-feature 
+        android:name="android.hardware.camera.front" 
+        android:required="false" />
+
+    <!-- ==================== APPLICATION CONFIG ==================== -->
+
+    <application
+        android:name=".MainApplication"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:allowBackup="false"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true" 
+        android:supportsRtl="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        tools:targetApi="31"
+        android:requestLegacyExternalStorage="true"
+>
+
+        <!-- ==================== MAIN ACTIVITY ==================== -->
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="true"
+            android:screenOrientation="portrait">
+            
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- ==================== FILE PROVIDER ==================== -->
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!-- ==================== FCM / FIREBASE CONFIG ==================== -->
+        
+        <!-- Firebase Init Provider (Auto-handled by @react-native-firebase) -->
+        <provider
+            android:name="com.google.firebase.provider.FirebaseInitProvider"
+            android:authorities="${applicationId}.firebaseinitprovider"
+            android:exported="false"
+            android:initOrder="100" />
+
+        <!-- Default notification channel for Android 8+ -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="presenza_general"
+            tools:replace="android:value" />
+
+        <!-- Notification icon for FCM messages -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
+
+        <!-- ==================== PUSH NOTIFICATION RECEIVERS ==================== -->
+        
+        <!-- Push Notification Receiver - Handles notifications when app is in foreground -->
+        <receiver
+            android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationReceiver"
+            android:exported="true" />
+
+        <!-- Push Notification Boot Receiver - Restarts notifications after device reboot -->
+        <receiver
+            android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBootEventReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Push Notification Listener Service - Handles incoming notifications -->
+        <service
+            android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+    </application>
+
+    <!-- ==================== QUERIES ==================== -->
+    
+    <queries>
+        <!-- PDF viewing intent -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="application/pdf" />
+        </intent>
+        <!-- Settings intent -->
+        <intent>
+            <action android:name="android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS" />
+        </intent>
+    </queries>
+
+</manifest>

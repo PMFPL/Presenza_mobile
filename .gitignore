@@ -1,0 +1,46 @@
+# ---- Dependencies ----
+node_modules/
+
+# ---- React Native / Metro ----
+.metro-health-check*
+dist/
+*.tsbuildinfo
+
+# ---- Environment & Secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- Android ----
+android/app/build/
+android/build/
+android/.gradle/
+android/.cxx/
+android/local.properties
+*.aab
+*.apk
+*.jks
+*.keystore
+
+# ---- iOS ----
+ios/build/
+ios/Pods/
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+*.xcuserstate
+xcuserdata/
+
+# ---- Ruby / CocoaPods / Bundler ----
+vendor/bundle/
+.bundle/
+
+# ---- macOS & IDE ----
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+# ---- Logs ----
+*.log
+npm-debug.log*
+yarn-error.log*

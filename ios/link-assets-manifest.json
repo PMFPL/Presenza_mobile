@@ -1,0 +1,61 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/GothamUltraItalic.ttf",
+      "sha1": "482f152f50acde57106c971298e47a2ee7fd19d0"
+    },
+    {
+      "path": "src/assets/fonts/GothamXLightItalic.ttf",
+      "sha1": "4e51370c42458df98f7e2af907b4c464b9768d13"
+    },
+    {
+      "path": "src/assets/fonts/GothamUltra.ttf",
+      "sha1": "e76e90a080446893bc35d9f8681ebb4586d93161"
+    },
+    {
+      "path": "src/assets/fonts/GothamLight.ttf",
+      "sha1": "631af61b1ad640f51b2aab8c9fb31f3a15a48b86"
+    },
+    {
+      "path": "src/assets/fonts/GothamBlack.ttf",
+      "sha1": "3b4cc21d0576992dd951634dda2a2d19545d7ae8"
+    },
+    {
+      "path": "src/assets/fonts/GothamBlackItalic.ttf",
+      "sha1": "b6d1a03d8d8bad47e3f4144acc2796e486fcad2a"
+    },
+    {
+      "path": "src/assets/fonts/GothamMediumItalic.ttf",
+      "sha1": "63b97b10a85a61e5d48388c5d9bc27a6905226e2"
+    },
+    {
+      "path": "src/assets/fonts/GothamBold.ttf",
+      "sha1": "d210a13e95908ff5b3448a4a8686c49522bf3da3"
+    },
+    {
+      "path": "src/assets/fonts/GothamThinItalic.ttf",
+      "sha1": "7d2d7f406a24c6ffd0a3f473a4cc99a17cc8479f"
+    },
+    {
+      "path": "src/assets/fonts/GothamBoldItalic.ttf",
+      "sha1": "6f174f8eb8fef2b4c46f68aa0fcc530eae9c4e7d"
+    },
+    {
+      "path": "src/assets/fonts/GothamXLight.ttf",
+      "sha1": "a25fd13acebb8c393905ff432fa8f8c7cc321d52"
+    },
+    {
+      "path": "src/assets/fonts/GothamLightItalic.ttf",
+      "sha1": "50d7f480fd5c7307f0852af7e87e2b6974b6b114"
+    },
+    {
+      "path": "src/assets/fonts/GothamMedium.ttf",
+      "sha1": "b7f0ed4dcf6148e944fceae336ad64e231880285"
+    },
+    {
+      "path": "src/assets/fonts/GothamThin.ttf",
+      "sha1": "62872fb16714fbef74db1a18dcf2630f8f7cd675"
+    }
+  ]
+}

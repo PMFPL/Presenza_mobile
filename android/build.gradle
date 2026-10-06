@@ -1,0 +1,41 @@
+buildscript {
+    ext {
+        buildToolsVersion = "36.0.0"
+        minSdkVersion = 24
+        compileSdkVersion = 36
+        targetSdkVersion = 36
+        ndkVersion = "27.0.12077973"
+        kotlinVersion = "1.9.10"
+        androidGradlePluginVersion = "8.1.1"
+        reactNativeGradlePluginVersion = "0.83.1"
+    }
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:${androidGradlePluginVersion}")
+        classpath("com.facebook.react:react-native-gradle-plugin:${reactNativeGradlePluginVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+        classpath 'com.google.gms:google-services:4.5.0'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://www.jitpack.io' }
+        // ✅ For react-native-push-notification
+        maven {
+            url "https://jcenter.bintray.com"
+            content {
+                includeGroup "com.dieam.reactnativepushnotification"
+                includeGroup "com.google.android.exoplayer"
+            }
+        }
+    }
+}
+
+apply plugin: "com.facebook.react.rootproject"
