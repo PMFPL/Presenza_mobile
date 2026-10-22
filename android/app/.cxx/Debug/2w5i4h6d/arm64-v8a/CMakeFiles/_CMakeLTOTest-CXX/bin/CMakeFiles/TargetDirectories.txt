@@ -1,0 +1,4 @@
+/Users/deepak/Documents/Projects/Presenza_mobile/android/app/.cxx/Debug/2w5i4h6d/arm64-v8a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir
+/Users/deepak/Documents/Projects/Presenza_mobile/android/app/.cxx/Debug/2w5i4h6d/arm64-v8a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir
+/Users/deepak/Documents/Projects/Presenza_mobile/android/app/.cxx/Debug/2w5i4h6d/arm64-v8a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/edit_cache.dir
+/Users/deepak/Documents/Projects/Presenza_mobile/android/app/.cxx/Debug/2w5i4h6d/arm64-v8a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/rebuild_cache.dir

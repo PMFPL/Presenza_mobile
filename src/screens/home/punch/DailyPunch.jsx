@@ -1,4 +1,3 @@
-
 // src/screens/home/punch/DailyPunch.jsx
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
@@ -84,10 +83,15 @@ const DailyPunch = ({ navigation }) => {
     state => state.attendance,
   );
 
-  // Profile for sales team detection
+  // Profile for Sales / LAP team detection
   const { profile } = useSelector(state => state.employeeProfile);
-  const department = profile?.[0]?.department || '';
-  const isSalesTeam = department?.toLowerCase().includes('sales');
+  const department = (profile?.[0]?.department || '').toLowerCase();
+
+  const isSalesTeam = department.includes('sales');
+  const isLapTeam = department.includes('lap');
+
+  // ✅ Both Sales and LAP can punch in remotely (outside geofence)
+  const isRemoteEligible = isSalesTeam || isLapTeam;
 
   const [uiState, setUiState] = useState('idle');
   const [mapVisible, setMapVisible] = useState(false);
@@ -384,12 +388,12 @@ const DailyPunch = ({ navigation }) => {
     punchInLoading ||
     hasActiveSession ||
     isCheckingLocation ||
-    (!isSalesTeam && outsideGeofence);
+    (!isRemoteEligible && outsideGeofence);
 
   const getAccentColor = () => {
     if (hasActiveSession) return C.warning;
-    if (isSalesTeam && outsideGeofence) return C.warning;
-    if (!isSalesTeam && outsideGeofence) return C.error;
+    if (isRemoteEligible && outsideGeofence) return C.warning;
+    if (!isRemoteEligible && outsideGeofence) return C.error;
     if (showLoader || punchInLoading) return C.primary;
     return C.primary;
   };
@@ -399,9 +403,9 @@ const DailyPunch = ({ navigation }) => {
   const getCircleIcon = () => {
     if (hasActiveSession)
       return <CheckCircle size={wp('14%')} color={C.textDark} />;
-    if (!isSalesTeam && outsideGeofence)
+    if (!isRemoteEligible && outsideGeofence)
       return <XCircle size={wp('14%')} color={C.textDark} />;
-    if (isSalesTeam && outsideGeofence)
+    if (isRemoteEligible && outsideGeofence)
       return <Briefcase size={wp('14%')} color={C.textDark} />;
     if (showLoader || punchInLoading) {
       return (
@@ -423,9 +427,9 @@ const DailyPunch = ({ navigation }) => {
     if (showLoader)
       return t.attendance.gettingLocation || 'GETTING LOCATION...';
     if (punchInLoading) return t.attendance.processing || 'PROCESSING...';
-    if (!isSalesTeam && outsideGeofence)
+    if (!isRemoteEligible && outsideGeofence)
       return t.attendance.outsideGeofenceStatus || 'OUT OF RANGE';
-    if (isSalesTeam && outsideGeofence)
+    if (isRemoteEligible && outsideGeofence)
       return t?.remoteLocation?.remotePunchIn || 'REMOTE PUNCH IN';
     if (uiState === 'success') return t.attendance.success || 'SUCCESS!';
     if (uiState === 'error') return t.attendance.error || 'ERROR!';
@@ -441,9 +445,9 @@ const DailyPunch = ({ navigation }) => {
       return t.attendance.detectingLocation || 'Detecting your location...';
     if (punchInLoading)
       return t.attendance.verifying || 'Verifying your details...';
-    if (!isSalesTeam && outsideGeofence)
+    if (!isRemoteEligible && outsideGeofence)
       return t.attendance.openMap || 'Open map to verify';
-    if (isSalesTeam && outsideGeofence)
+    if (isRemoteEligible && outsideGeofence)
       return t?.remoteLocation?.tapToConfirm || 'Tap to confirm location';
     if (uiState === 'error') return t.attendance.tapRetry || 'Tap to retry';
     return '';
@@ -453,7 +457,7 @@ const DailyPunch = ({ navigation }) => {
     if (hasActiveSession) return t.attendance.sessionActive || 'ACTIVE SESSION';
     if (showLoader) return t.attendance.locating || 'LOCATING...';
     if (punchInLoading) return t.attendance.processing || 'PROCESSING';
-    if (isSalesTeam && isInsideGeofence === false)
+    if (isRemoteEligible && isInsideGeofence === false)
       return t?.remoteLocation?.remoteLabel || 'REMOTE LOCATION';
     if (isInsideGeofence === false)
       return t.attendance.outsideGeofenceStatus || 'OUTSIDE GEOFENCE';
@@ -470,10 +474,10 @@ const DailyPunch = ({ navigation }) => {
       return t.attendance.checkingLocation || 'Checking your location...';
     if (punchInLoading)
       return t.attendance.verifyingAttendance || 'Verifying your attendance...';
-    if (isSalesTeam && isInsideGeofence === false) {
+    if (isRemoteEligible && isInsideGeofence === false) {
       return (
         t?.remoteLocation?.salesOutsideMsg ||
-        'Remote punch-in available for sales team'
+        'Remote punch-in available for your team'
       );
     }
     if (isInsideGeofence === true)
@@ -487,7 +491,7 @@ const DailyPunch = ({ navigation }) => {
     ? C.warning
     : isCheckingLocation || punchInLoading
     ? C.primary
-    : isSalesTeam && isInsideGeofence === false
+    : isRemoteEligible && isInsideGeofence === false
     ? C.warning
     : isInsideGeofence === false
     ? C.error
@@ -502,7 +506,7 @@ const DailyPunch = ({ navigation }) => {
       ? C.warning + '18'
       : showLoader || punchInLoading
       ? C.primary + '18'
-      : isSalesTeam && isInsideGeofence === false
+      : isRemoteEligible && isInsideGeofence === false
       ? C.warning + '18'
       : isInsideGeofence
       ? C.success + '18'
@@ -511,7 +515,7 @@ const DailyPunch = ({ navigation }) => {
       ? C.warning + '50'
       : showLoader || punchInLoading
       ? C.primary + '50'
-      : isSalesTeam && isInsideGeofence === false
+      : isRemoteEligible && isInsideGeofence === false
       ? C.warning + '50'
       : isInsideGeofence
       ? C.success + '50'
@@ -520,7 +524,7 @@ const DailyPunch = ({ navigation }) => {
       ? C.warning
       : showLoader || punchInLoading
       ? C.primary
-      : isSalesTeam && isInsideGeofence === false
+      : isRemoteEligible && isInsideGeofence === false
       ? C.warning
       : isInsideGeofence
       ? C.success
@@ -532,7 +536,7 @@ const DailyPunch = ({ navigation }) => {
     if (hasActiveSession) return <CheckCircle2 size={size} color={C.warning} />;
     if (showLoader || punchInLoading)
       return <Loader size={size} color={C.primary} />;
-    if (isSalesTeam && isInsideGeofence === false)
+    if (isRemoteEligible && isInsideGeofence === false)
       return <Briefcase size={size} color={C.warning} />;
     if (isInsideGeofence) return <CheckCircle2 size={size} color={C.success} />;
     return <AlertTriangle size={size} color={C.error} />;
@@ -590,7 +594,7 @@ const DailyPunch = ({ navigation }) => {
     try {
       const result = await dispatch(punchIn());
 
-      // 🔥 NEW: Handle camera cancellation
+      // 🔥 Handle camera cancellation
       if (result?.cancelled) {
         console.log('📸 Camera cancelled by user');
         setIsProcessing(false);
@@ -649,19 +653,19 @@ const DailyPunch = ({ navigation }) => {
 
     if (punchInLoading || isCheckingLocation) return;
 
-    // Non-sales: block if outside geofence
-    if (!isSalesTeam && outsideGeofence) {
+    // Non-remote-eligible teams: block if outside geofence
+    if (!isRemoteEligible && outsideGeofence) {
       showToast(t.alerts.outsideGeofence, 'error');
       return;
     }
 
-    // Sales team + outside geofence → show remote location modal
-    if (isSalesTeam && outsideGeofence) {
+    // Remote-eligible teams (Sales + LAP) + outside geofence → show remote modal
+    if (isRemoteEligible && outsideGeofence) {
       setRemoteModalVisible(true);
       return;
     }
 
-    // Inside geofence or sales team inside — proceed
+    // Inside geofence or remote-eligible team inside — proceed
     await executePunch();
   };
 
@@ -725,8 +729,8 @@ const DailyPunch = ({ navigation }) => {
           },
         ]}
       >
-        {/* Sales team badge */}
-        {isSalesTeam && (
+        {/* Sales / LAP team badge */}
+        {isRemoteEligible && (
           <View
             style={[
               styles.salesBadge,
@@ -738,8 +742,11 @@ const DailyPunch = ({ navigation }) => {
           >
             <Briefcase size={wp('3.5%')} color={C.warning} />
             <Text style={[styles.salesBadgeText, { color: C.warning }]}>
-              {t?.remoteLocation?.salesTeamBadge ||
-                'Sales Team — Remote Punch-In Enabled'}
+              {isSalesTeam
+                ? t?.remoteLocation?.salesTeamBadge ||
+                  'Sales Team — Remote Punch-In Enabled'
+                : t?.remoteLocation?.lapTeamBadge ||
+                  'LAP Team — Remote Punch-In Enabled'}
             </Text>
           </View>
         )}
@@ -821,7 +828,7 @@ const DailyPunch = ({ navigation }) => {
         {/* Punch Circle */}
         <View style={styles.punchSection}>
           {!hasActiveSession &&
-            !(isSalesTeam ? false : outsideGeofence) &&
+            !(isRemoteEligible ? false : outsideGeofence) &&
             uiState !== 'error' && (
               <Animated.View
                 style={[
@@ -939,8 +946,8 @@ const DailyPunch = ({ navigation }) => {
           </View>
         </View> */}
 
-        {/* Distance Info for non-sales */}
-        {!isSalesTeam &&
+        {/* Distance Info for non-remote-eligible teams */}
+        {!isRemoteEligible &&
           !hasActiveSession &&
           !isCheckingLocation &&
           !punchInLoading &&
@@ -962,8 +969,8 @@ const DailyPunch = ({ navigation }) => {
             </View>
           )}
 
-        {/* Distance Info for sales team */}
-        {isSalesTeam &&
+        {/* Distance Info for remote-eligible teams (Sales + LAP) */}
+        {isRemoteEligible &&
           !hasActiveSession &&
           !isCheckingLocation &&
           !punchInLoading &&
@@ -983,8 +990,11 @@ const DailyPunch = ({ navigation }) => {
                 {Math.round(distance)} {t.geofence.meters || 'm'}
               </Text>
               <Text style={[styles.distanceHint, { color: C.warning }]}>
-                {t?.remoteLocation?.salesDistanceHint ||
-                  'Tap the punch button to confirm remote punch-in'}
+                {isSalesTeam
+                  ? t?.remoteLocation?.salesDistanceHint ||
+                    'Tap the punch button to confirm remote punch-in'
+                  : t?.remoteLocation?.lapDistanceHint ||
+                    'Tap the punch button to confirm remote punch-in'}
               </Text>
             </View>
           )}
@@ -995,7 +1005,7 @@ const DailyPunch = ({ navigation }) => {
         visible={mapVisible}
         onClose={() => setMapVisible(false)}
         onStatusChange={handleGeofenceStatusChange}
-        isSalesTeam={isSalesTeam}
+        isSalesTeam={isRemoteEligible}
       />
 
       {/* Remote Location Confirmation Modal */}
@@ -1253,4 +1263,3 @@ const styles = StyleSheet.create({
 });
 
 export default DailyPunch;
-

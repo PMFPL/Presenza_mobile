@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "HtmlToPdfSpec_autolinked_build",
+		"source" : "/Users/deepak/Documents/Projects/Presenza_mobile/node_modules/react-native-html-to-pdf/android/build/generated/source/codegen/jni"
+	}
+}

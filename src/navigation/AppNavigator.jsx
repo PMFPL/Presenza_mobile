@@ -35,6 +35,9 @@ import Meetings from '../screens/home/meetings/Meetings';
 import KRA from '../screens/home/kra/KRA';
 import VisitScreen from '../screens/home/VisitScreen/VisitScreen';
 
+// ✅ Import BASE_URL to detect LIVE vs UAT
+import { BASE_URL } from '../utils/GlobalText';
+
 // ============================================================
 // 🚨 SECURITY GUARD - COMMENTED FOR EMULATOR TESTING
 // ============================================================
@@ -56,6 +59,10 @@ import {
 } from '../utils/permissions';
 
 const Stack = createNativeStackNavigator();
+
+// ✅ LIVE URL detection - update popup will show ONLY on LIVE
+const LIVE_URL = 'https://api-presenza.paulmerchants.net/api/v1';
+const IS_LIVE = BASE_URL === LIVE_URL;
 
 // Helper function to compare versions
 const compareVersions = (a, b) => {
@@ -103,7 +110,7 @@ const AppNavigator = () => {
   const dispatch = useDispatch();
   const { isAuthenticated, loading } = useSelector(state => state.auth);
   const appStateRef = useRef('active');
-  
+
   const [forceUpdate, setForceUpdate] = useState(false);
   const [storeUrl, setStoreUrl] = useState('');
   const [storeVersion, setStoreVersion] = useState('');
@@ -127,17 +134,17 @@ const AppNavigator = () => {
     if (toastTimeoutRef.current) {
       clearTimeout(toastTimeoutRef.current);
     }
-    
+
     // If we're already showing a toast, don't show another
     if (isShowingToast.current) {
       console.log('⏭️ Toast already showing, skipping duplicate');
       return;
     }
-    
+
     console.log('🔔 Showing toast');
     isShowingToast.current = true;
     showToast(message, type, duration);
-    
+
     // Reset the flag after the toast duration
     toastTimeoutRef.current = setTimeout(() => {
       isShowingToast.current = false;
@@ -148,53 +155,53 @@ const AppNavigator = () => {
   // Function to request permissions and show popup
   const requestPermissions = async () => {
     console.log('📱 Requesting permissions...');
-    
+
     const cameraResult = await requestCameraPermission(true);
     const locationResult = await requestLocationPermission(true);
-    
+
     const cameraGranted = cameraResult.granted;
     const locationGranted = locationResult.granted;
-    
+
     console.log(`Camera: ${cameraGranted}, Location: ${locationGranted}`);
-    
+
     setPermissionsStatus({
       camera: cameraGranted,
       location: locationGranted,
     });
-    
+
     return { cameraGranted, locationGranted };
   };
 
   // Function to check and show toast based on permissions
   const checkAndShowToast = async (cameraGranted, locationGranted) => {
     const hasAllPermissions = cameraGranted && locationGranted;
-    
+
     console.log(`Checking permissions - Camera: ${cameraGranted}, Location: ${locationGranted}, All: ${hasAllPermissions}`);
-    
+
     if (hasAllPermissions) {
       // All permissions are granted - clear the flag
       await AsyncStorage.removeItem('toast_shown_for_missing_permissions');
       console.log('✅ All permissions granted, cleared toast flag');
       return;
     }
-    
+
     // Some permissions are missing
     const missingPermissions = [];
     if (!cameraGranted) missingPermissions.push('Camera');
     if (!locationGranted) missingPermissions.push('Location');
-    
+
     console.log(`Missing permissions: ${missingPermissions.join(', ')}`);
-    
+
     // Check if we've shown toast before for missing permissions
     const toastShown = await AsyncStorage.getItem('toast_shown_for_missing_permissions');
     console.log('Toast shown flag from storage:', toastShown);
-    
+
     if (!toastShown) {
       // Show toast and save flag
-      const message = missingPermissions.length === 2 
+      const message = missingPermissions.length === 2
         ? '⚠️ Camera & Location permissions are missing. Please enable in settings.'
         : `⚠️ ${missingPermissions[0]} permission is missing. Please enable in settings.`;
-      
+
       // Use the single toast function
       showToastOnce(message, 'warning', 4000);
       await AsyncStorage.setItem('toast_shown_for_missing_permissions', 'true');
@@ -210,7 +217,7 @@ const AppNavigator = () => {
     try {
       // Request permissions (this will show the popup)
       const { cameraGranted, locationGranted } = await requestPermissions();
-      
+
       console.log(`Permissions result - Camera: ${cameraGranted}, Location: ${locationGranted}`);
 
       // Check and show toast if needed
@@ -248,29 +255,36 @@ const AppNavigator = () => {
 
   // ================= VERSION CHECK =================
   const checkAppVersion = async () => {
+    // ✅ SKIP version check entirely on UAT — no "Update Now" popup
+    if (!IS_LIVE) {
+      console.log('🧪 UAT build detected - skipping version check (no update popup)');
+      setForceUpdate(false);
+      return;
+    }
+
     try {
-      console.log('📦 Checking app version...');
-      
+      console.log('📦 Checking app version (LIVE build)...');
+
       // Get current version from app
       const currentVersion = await VersionCheck.getCurrentVersion();
       console.log('Current version:', currentVersion);
-      
+
       // Get latest version from Play Store
       const latestVersion = await VersionCheck.getLatestVersion();
       console.log('Latest version from store:', latestVersion);
-      
+
       // Get store URL
       const storeUrl = await VersionCheck.getStoreUrl();
       console.log('Store URL:', storeUrl);
-      
+
       // Compare versions manually (MORE RELIABLE)
       const compareResult = compareVersions(currentVersion, latestVersion);
       const needsUpdate = compareResult < 0;
-      
+
       // Check minimum version support
       const MIN_SUPPORTED_VERSION = '1.0.0'; // Set your minimum supported version
       const isBelowMinimum = compareVersions(currentVersion, MIN_SUPPORTED_VERSION) < 0;
-      
+
       if (needsUpdate || isBelowMinimum) {
         console.log('⚠️ Update needed!');
         console.log(`Current: ${currentVersion}, Latest: ${latestVersion}`);
@@ -329,7 +343,7 @@ const AppNavigator = () => {
   // ================= CHECK PERMISSIONS ON FOREGROUND =================
   const checkPermissionsOnForeground = async () => {
     console.log('🔄 Checking permissions on foreground...');
-    
+
     try {
       // ✅ FIX: Use direct permission check with react-native-permissions
       let cameraGranted = false;
@@ -343,27 +357,27 @@ const AppNavigator = () => {
         const locationStatus = await PermissionsAndroid.check(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
         );
-        
+
         cameraGranted = cameraStatus;
         locationGranted = locationStatus;
       } else {
         // For iOS, use react-native-permissions
         const cameraStatus = await check(PERMISSIONS.IOS.CAMERA);
         const locationStatus = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
-        
+
         cameraGranted = cameraStatus === RESULTS.GRANTED;
         locationGranted = locationStatus === RESULTS.GRANTED;
       }
 
       console.log(`Direct check - Camera: ${cameraGranted}, Location: ${locationGranted}`);
-      
+
       setPermissionsStatus({
         camera: cameraGranted,
         location: locationGranted,
       });
-      
+
       const hasAllPermissions = cameraGranted && locationGranted;
-      
+
       if (hasAllPermissions) {
         // All permissions are granted - clear the flag
         await AsyncStorage.removeItem('toast_shown_for_missing_permissions');
@@ -377,21 +391,21 @@ const AppNavigator = () => {
           console.log('⏭️ Already checked permissions on this foreground session, skipping toast');
           return;
         }
-        
+
         const toastShown = await AsyncStorage.getItem('toast_shown_for_missing_permissions');
-        
+
         // Only show toast if we haven't shown it before AND permissions are not all granted
         if (!toastShown) {
           const missingPermissions = [];
           if (!cameraGranted) missingPermissions.push('Camera');
           if (!locationGranted) missingPermissions.push('Location');
-          
-          const message = missingPermissions.length === 2 
+
+          const message = missingPermissions.length === 2
             ? '⚠️ Camera & Location permissions are missing. Please enable in settings.'
             : `⚠️ ${missingPermissions[0]} permission is missing. Please enable in settings.`;
-          
+
           console.log(`🔔 Showing toast for missing permissions on foreground: ${missingPermissions.join(', ')}`);
-          
+
           // Use the single toast function
           showToastOnce(message, 'warning', 4000);
           await AsyncStorage.setItem('toast_shown_for_missing_permissions', 'true');
@@ -400,7 +414,7 @@ const AppNavigator = () => {
           console.log('⏭️ Toast already shown before, skipping on foreground');
         }
       }
-      
+
     } catch (error) {
       console.log('Error checking permissions:', error);
     }
@@ -430,10 +444,10 @@ const AppNavigator = () => {
       nextAppState === 'active'
     ) {
       console.log('🔄 APP FOREGROUND - Checking permissions');
-      
+
       // Reset the foreground check flag when app comes to foreground
       hasCheckedForeground.current = false;
-      
+
       // Wait for app to be fully active
       setTimeout(async () => {
         await checkPermissionsOnForeground();
@@ -497,8 +511,8 @@ const AppNavigator = () => {
         </View>
       )}
 
-      {/* 📱 VERSION UPDATE MODAL */}
-      {forceUpdate && !blocked && (
+      {/* 📱 VERSION UPDATE MODAL (only on LIVE) */}
+      {IS_LIVE && forceUpdate && !blocked && (
         <Modal visible={true} transparent={true} animationType="fade">
           <View style={styles.modalContainer}>
             <View style={styles.modalBox}>
@@ -518,7 +532,9 @@ const AppNavigator = () => {
       )}
 
       {/* NORMAL APP NAVIGATION */}
-      {!blocked && !forceUpdate && (isAuthenticated ? <AppStack /> : <AuthStack />)}
+      {!blocked && !(IS_LIVE && forceUpdate) && (
+        isAuthenticated ? <AppStack /> : <AuthStack />
+      )}
     </View>
   );
 };
